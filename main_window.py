@@ -1,12 +1,13 @@
 from tkinter import Tk, Label, Button, Entry, ttk
 from tkinter.filedialog import askdirectory
 from pytube import YouTube
+from function_and_error_windows import inital_error_window, wrong_output_error_window
 
 
 """
-Button Browse, allows to pick any localization. -- Done
-Button Add to Queue, add requested link to the tree -- Done
-Button Download, take every position from the tree and downloads it to user given localization -- Done
+Button Browse, allows to pick any localization.
+Button Add to Queue, add requested link to the tree
+Button Download, take every position from the tree and downloads it to user given localization
 Button Delete, allows to delete any positions from queue
 """
 
@@ -48,7 +49,7 @@ class DownloadWindow:
         self.tree_view.column(0, width=300)
         self.tree_view.grid(row=5, column=1, pady=25)
 
-        self.button_delete = Button(self.root, text='Delete')
+        self.button_delete = Button(self.root, text='Delete', command=self.delete_position)
         self.button_delete.grid(row=5, column=2)
 
         self.button_download = Button(self.root, text='Download', width=25, height=2, bg='black', fg='white',
@@ -65,13 +66,19 @@ class DownloadWindow:
     def take_entry_link(self):
         self.link = self.entry_link.get()
 
+    def delete_position(self):
+        item = self.tree_view.focus()
+        self.link_table.remove(self.link)
+        self.tree_view.delete(item)
+
     """This method goes to Add to Queue Button"""
     def add_to_queue(self):
-        self.take_entry_link()
-        self.yt = YouTube(self.link)
-        self.tree_view.insert("", 'end', values=(self.yt.title, self.link, self.list_output.get()))
-        self.entry_link.delete(0, 'end')
-        self.link_table.append(self.link)
+        if self.entry_localization.get() and self.entry_link.get() and self.list_output.get():
+            self.take_entry_link()
+            self.yt = YouTube(self.link)
+            self.tree_view.insert("", 'end', values=(self.yt.title, self.link, self.list_output.get()))
+            self.entry_link.delete(0, 'end')
+            self.link_table.append(self.link)
 
     """This method goes to Browse Button"""
     def localization(self):
@@ -82,18 +89,22 @@ class DownloadWindow:
     """This method goes to Download Button"""
     def prepare_to_download(self):
         """Pick format and download it"""
-
-        for x in self.link_table:
-            if self.list_output.get() == 'Video':
-                yt = YouTube(x)
-                stream = yt.streams.first()
-                stream.download(self.entry_localization.get())
-            elif self.list_output.get() == 'Audio':
-                yt = YouTube(x)
-                stream = yt.streams.filter(only_audio=True).first()
-                stream.download(self.entry_localization.get())
-            else:
-                pass
+        if len(self.link_table) != 0:
+            for x in self.link_table:
+                if self.list_output.get() == 'Video':
+                    yt = YouTube(x)
+                    stream = yt.streams.first()
+                    stream.download(self.entry_localization.get())
+                    self.link_table.remove(x)
+                elif self.list_output.get() == 'Audio':
+                    yt = YouTube(x)
+                    stream = yt.streams.filter(only_audio=True).first()
+                    stream.download(self.entry_localization.get())
+                else:
+                    wrong_output_error_window()
+            self.tree_view.delete(*self.tree_view.get_children())
+        else:
+            inital_error_window()
 
 
 if __name__ == '__main__':
