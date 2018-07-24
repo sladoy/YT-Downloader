@@ -17,3 +17,12 @@ def wrong_output_error_window():
     button = Button(root, text='Ok', command=root.destroy)
     button.pack()
     root.mainloop()
+
+
+def download_completed():
+    root = Tk()
+    label = Label(root, text="Download completed")
+    label.pack()
+    button = Button(root, text='Ok', command=root.destroy)
+    button.pack()
+    root.mainloop()

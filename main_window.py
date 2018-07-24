@@ -1,7 +1,8 @@
 from tkinter import Tk, Label, Button, Entry, ttk
 from tkinter.filedialog import askdirectory
 from pytube import YouTube
-from function_and_error_windows import inital_error_window, wrong_output_error_window
+from progressbar import ProgressBar
+from function_and_error_windows import inital_error_window, wrong_output_error_window, download_completed
 
 
 """
@@ -49,7 +50,7 @@ class DownloadWindow:
         self.tree_view.column(0, width=300)
         self.tree_view.grid(row=5, column=1, pady=25)
 
-        self.button_delete = Button(self.root, text='Delete', command=self.delete_position)
+        self.button_delete = Button(self.root, text='Delete', width=10,command=self.delete_position)
         self.button_delete.grid(row=5, column=2)
 
         self.button_download = Button(self.root, text='Download', width=25, height=2, bg='black', fg='white',
@@ -61,6 +62,9 @@ class DownloadWindow:
         self.more_window = None
         self.link_table = []
         self.name_of_video = None
+
+        self.progress_bar = ProgressBar()
+
         self.root.mainloop()
 
     def take_entry_link(self):
@@ -90,7 +94,7 @@ class DownloadWindow:
     def prepare_to_download(self):
         """Pick format and download it"""
         if len(self.link_table) != 0:
-            for x in self.link_table:
+            for x in self.progress_bar(self.link_table):
                 if self.list_output.get() == 'Video':
                     yt = YouTube(x)
                     stream = yt.streams.first()
@@ -100,9 +104,11 @@ class DownloadWindow:
                     yt = YouTube(x)
                     stream = yt.streams.filter(only_audio=True).first()
                     stream.download(self.entry_localization.get())
+                    self.link_table.remove(x)
                 else:
                     wrong_output_error_window()
             self.tree_view.delete(*self.tree_view.get_children())
+            download_completed()
         else:
             inital_error_window()
 
