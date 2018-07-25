@@ -1,7 +1,6 @@
 from tkinter import Tk, Label, Button, Entry, ttk
 from tkinter.filedialog import askdirectory
 from pytube import YouTube
-from progressbar import ProgressBar
 from function_and_error_windows import inital_error_window, wrong_output_error_window, download_completed
 
 
@@ -22,7 +21,6 @@ class DownloadWindow:
         self.label_link.grid(row=0, column=0, padx=5, sticky='W')
 
         self.entry_link = Entry(self.root, width=50)
-        self.entry_link.insert(0, 'https://www.youtube.com/watch?v=6xS0T6_SZcs')
         self.entry_link.grid(row=0, column=1)
 
         self.label_localization = Label(self.root, text='Where to save a file ?')
@@ -57,13 +55,10 @@ class DownloadWindow:
                                       command=self.prepare_to_download)
         self.button_download.grid(row=6, column=1)
 
-        self.yt = None
         self.link = None
         self.more_window = None
         self.link_table = []
         self.name_of_video = None
-
-        self.progress_bar = ProgressBar()
 
         self.root.mainloop()
 
@@ -72,17 +67,18 @@ class DownloadWindow:
 
     def delete_position(self):
         item = self.tree_view.focus()
-        self.link_table.remove(self.link)
+        item = self.tree_view.focus()
+        self.link_table.remove(self.link_table[0])
         self.tree_view.delete(item)
 
     """This method goes to Add to Queue Button"""
     def add_to_queue(self):
         if self.entry_localization.get() and self.entry_link.get() and self.list_output.get():
             self.take_entry_link()
-            self.yt = YouTube(self.link)
-            self.tree_view.insert("", 'end', values=(self.yt.title, self.link, self.list_output.get()))
+            yt = YouTube(self.link)
+            self.tree_view.insert("", 'end', values=(yt.title, self.link, self.list_output.get()))
             self.entry_link.delete(0, 'end')
-            self.link_table.append(self.link)
+            self.link_table.append([self.link, self.list_output.get()])
 
     """This method goes to Browse Button"""
     def localization(self):
@@ -94,19 +90,20 @@ class DownloadWindow:
     def prepare_to_download(self):
         """Pick format and download it"""
         if len(self.link_table) != 0:
-            for x in self.progress_bar(self.link_table):
-                if self.list_output.get() == 'Video':
-                    yt = YouTube(x)
-                    stream = yt.streams.first()
-                    stream.download(self.entry_localization.get())
-                    self.link_table.remove(x)
-                elif self.list_output.get() == 'Audio':
-                    yt = YouTube(x)
+            while self.link_table:
+                first_element = self.link_table[0][0]
+                yt = YouTube(first_element)
+                if self.link_table[0][1] == "Audio":
                     stream = yt.streams.filter(only_audio=True).first()
                     stream.download(self.entry_localization.get())
-                    self.link_table.remove(x)
-                else:
-                    wrong_output_error_window()
+                    self.link_table.remove(self.link_table[0])
+                    yt = None
+                elif self.link_table[0][1] == "Video":
+                    stream = yt.streams.first()
+                    stream.download(self.entry_localization.get())
+                    self.link_table.remove(self.link_table[0])
+                    yt = None
+
             self.tree_view.delete(*self.tree_view.get_children())
             download_completed()
         else:
