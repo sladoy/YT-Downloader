@@ -65,10 +65,20 @@ class DownloadWindow:
     def take_entry_link(self):
         self.link = self.entry_link.get()
 
+    def find_position(self, link_of_item, output_of_item):
+        for x, y in enumerate(self.link_table):
+            if link_of_item == y[0] and output_of_item == y[1]:
+                return x
+
     def delete_position(self):
-        item = self.tree_view.focus()
-        item = self.tree_view.focus()
-        self.link_table.remove(self.link_table[0])
+        item = self.tree_view.focus()  # Get id of picked item
+
+        link_of_item = self.tree_view.item(item)['values'][1]  # Get value of picked item (link)
+        output_of_item = self.tree_view.item(item)['values'][2]  # Get value of picked item (output)
+
+        item_to_delete = self.find_position(link_of_item, output_of_item)
+
+        self.link_table.remove(self.link_table[item_to_delete])
         self.tree_view.delete(item)
 
     """This method goes to Add to Queue Button"""
