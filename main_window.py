@@ -59,6 +59,7 @@ class DownloadWindow:
         self.more_window = None
         self.link_table = []
         self.name_of_video = None
+        self.yt = None
 
         self.root.mainloop()
 
@@ -85,10 +86,11 @@ class DownloadWindow:
     def add_to_queue(self):
         if self.entry_localization.get() and self.entry_link.get() and self.list_output.get():
             self.take_entry_link()
-            yt = YouTube(self.link)
-            self.tree_view.insert("", 'end', values=(yt.title, self.link, self.list_output.get()))
+            self.yt = YouTube(self.link)
+            self.tree_view.insert("", 'end', values=(self.yt.title, self.link, self.list_output.get()))
             self.entry_link.delete(0, 'end')
             self.link_table.append([self.link, self.list_output.get()])
+        
 
     """This method goes to Browse Button"""
     def localization(self):
@@ -98,6 +100,9 @@ class DownloadWindow:
 
     """This method goes to Download Button"""
     def prepare_to_download(self):
+        # Streams filter settings
+
+        #
         """Pick format and download it"""
         if len(self.link_table) != 0:
             while self.link_table:
@@ -120,5 +125,59 @@ class DownloadWindow:
             inital_error_window()
 
 
+""" class SettingsWindow(DownloadWindow):
+    def __init__(self):
+        DownloadWindow.__init__(self)
+        self.x = None
+        self.tree_values = None
+        self.itag_table = []
+    
+    def guiido(self):
+        self.root = Tk()
+        self.root.title('Choosing Window')
+        self.label = Label(self.root, text='Choose format:\t')
+        self.label.pack()
+
+        self.choose_tree_view = ttk.Treeview(self.root, columns=[0, 1, 2, 3, 4, 5], show='headings')
+        self.choose_tree_view.heading(0, text='Tag')
+        self.choose_tree_view.heading(1, text='Format')
+        self.choose_tree_view.heading(2, text='FPS')
+        self.choose_tree_view.heading(3, text='ABR')
+        self.choose_tree_view.heading(4, text='Video Codec')
+        self.choose_tree_view.heading(5, text='Audio Codec')
+
+        self.choose_tree_view.column(0, width=30)
+        self.choose_tree_view.column(1, width=100)
+        self.choose_tree_view.column(2, width=30)
+        self.choose_tree_view.column(3, width=50)
+
+        self.choose_tree_view.pack()
+
+        self.ok_button = Button(self.root, text='OK', command=lambda :[self.pass_value(), self.get_value()])
+        self.ok_button.pack()
+        self.cancel_button = Button(self.root, text='Cancel', command=self.root.destroy)
+        self.cancel_button.pack()
+
+        for x in DownloadWindow.
+            self.choose_tree_view.insert("", "end", values=[x.itag, x.mime_type, x.fps,
+                                                            x.abr, x.audio_codec, x.video_codec])
+
+        self.root.mainloop()
+    
+        
+
+
+    def pass_value(self):
+        self.values = self.choose_tree_view.focus()
+        return self.choose_tree_view.item(self.values)['values'][0]
+
+    def get_value(self):
+        self.values = self.choose_tree_view.focus()
+        self.tree_values = self.choose_tree_view.item(self.values)
+
+
+
+
+ """
 if __name__ == '__main__':
     DownloadWindow()
